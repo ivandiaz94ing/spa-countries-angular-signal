@@ -1,2 +1,9 @@
-<country-search-input  (query)="onSearch($event)" [placeholder]="'Buscar por país'"/>
+<country-search-input  (query)="query.set($event)" [placeholder]="'Buscar por país'"/>
 <!-- <app-country-list/> -->
+<!-- <button class="btn btn-info"(click)="onFast()">FastAPI</button> -->
+@if (countryResource.error()) {
+  <h2>{{countryResource.error()}}</h2>
+
+}@if(countryResource.hasValue()){
+  <app-country-list [countries]="countryResource.value()" />
+}
