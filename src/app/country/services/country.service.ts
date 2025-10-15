@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable, Query } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { RESTCountry } from '../interfaces/REST-countries.interface';
-import { catchError, delay, map, tap, throwError } from 'rxjs';
+import { catchError, delay, map, Observable, of, throwError } from 'rxjs';
 import { CountryMapper } from '../mapper/country-mapper';
+import { Country } from '../interfaces/country.interface';
 
 const Uri = 'https://restcountries.com/v3.1';
 
@@ -13,31 +14,32 @@ const Uri = 'https://restcountries.com/v3.1';
 export class CountryService {
   private http = inject(HttpClient);
 
-  searchByCapital(query: string) {
-    query = query.toLowerCase();
-    return this.http.get<RESTCountry[]>(`${Uri}/capital/${query}`)
-    .pipe(
-      map((resp) => CountryMapper.toContries(resp)),
-      // delay(3000),
-      catchError((error) => {
-        return throwError(
-          () => new Error(`No se pudo obtener paises con ese query: ${query}`)
-        );
-      })
-
-    );
+  // Un método privado para manejar las peticiones y la lógica de errores de forma centralizada
+  private getCountries(url: string): Observable<Country[]> {
+    return this.http.get<RESTCountry[]>(url)
+      .pipe(
+        map((resp) => CountryMapper.toContries(resp)),
+        // El error 404 de la API no debe ser un error que rompa la app,
+        // sino un caso de "no se encontraron resultados".
+        // Por eso, en caso de error, devolvemos un array vacío.
+        catchError(() => of([]))
+      );
   }
 
-  searchByCountry(query: string) {
+
+  searchByCapital(query: string): Observable<Country[]> {
     query = query.toLowerCase();
-    return this.http.get<RESTCountry[]>(`${Uri}/name/${query}`)
-    .pipe(
-      map( (resp) => CountryMapper.toContries(resp)),
-      delay(2000),
-      catchError((error) => {
-        return [];
-      })
-    )
+    const url = `${Uri}/capital/${query}`;
+    return this.getCountries(url);
+  }
+
+  searchByCountry(query: string): Observable<Country[]> {
+    query = query.toLowerCase();
+    const url = `${Uri}/name/${query}`;
+    return this.getCountries(url).pipe(
+      // Se mantiene el delay solo para este método si es necesario para simulación
+      delay(1000)
+    );
   }
 
   // searchFastAPI() {
