@@ -1,9 +1,11 @@
 <country-search-input  (query)="query.set($event)" [placeholder]="'Buscar por país'"/>
 <!-- <app-country-list/> -->
-<!-- <button class="btn btn-info"(click)="onFast()">FastAPI</button> -->
-@if (countryResource.error()) {
-  <h2>{{countryResource.error()}}</h2>
 
-}@if(countryResource.hasValue()){
-  <app-country-list [countries]="countryResource.value()" />
-}
+
+  <app-country-list
+  [countries]="countryResource.value() ??[]"
+  [errorMessage]="countryResource.error()"
+  [isLoading]="countryResource.isLoading()"
+  [isEmpty]="countryResource.hasValue() && countryResource.value().length === 0"
+  />
+

@@ -1,5 +1,6 @@
 import { Component, inject, resource, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { CountryListComponent } from "../../components/country-list/country-list.component";
 import { SearchInputComponent } from "../../components/search-input/search-input.component";
 import { CountryService } from '../../services/country.service';
@@ -15,16 +16,33 @@ export class ByCapitalPageComponent {
   countryService = inject(CountryService);
   query = signal<string>('');
 
-  countryResource = resource({
-    params: () => ({ query: this.query() }),
-    loader: async ({ params }) => {
-      if (!this.query()) return [];
-      return await firstValueFrom(
-        this.countryService.searchByCapital(this.query())
-      );
-    },
-  });
+  /*
+Codigo para trabajar petion http mediante recurso que automatiza
+/todos las validaciones. Esto trabaja con Promesas
+*/
 
+// countryResource = resource({
+//   params: () => ({ query: this.query() }),
+//   loader: async ({ params }) => {
+//     if (!this.query()) return [];
+//     return await firstValueFrom(
+//       this.countryService.searchByCapital(this.query())
+//     );
+//   },
+// });
+
+//rxResource devuelve observable
+countryResource = rxResource({
+  params: () => ({ query: this.query() }),
+  stream :  ({ params }) => {
+    if(!params.query) return of([]);
+
+    return this.countryService.searchByCapital(params.query);
+  },
+});
+
+
+//Codigo manual para realizar una peticion http
   // if (this.isLoading()) return;
 
   // this.isLoading.set(true);
