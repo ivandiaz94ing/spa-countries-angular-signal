@@ -20,7 +20,7 @@ export class ByCapitalPageComponent {
 Codigo para trabajar petion http mediante recurso que automatiza
 /todos las validaciones. Esto trabaja con Promesas
 */
-
+//Resource devuelve Promesa
 // countryResource = resource({
 //   params: () => ({ query: this.query() }),
 //   loader: async ({ params }) => {

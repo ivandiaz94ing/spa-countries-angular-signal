@@ -41,8 +41,20 @@ export class CountryService {
       delay(1000)
     );
   }
+  searchCountryByAlphaCode(code: string) {
+    const url = `${Uri}/alpha/${code}`;
+    return this.http.get<RESTCountry[]>(url)
+      .pipe(
+        map((resp) => CountryMapper.toContries(resp)),
+        map( countries => countries[0]),
+        catchError((error) => {
+          console.log('Error fetching', error);
 
-  // searchFastAPI() {
-  //   return this.http.get(nest).pipe(tap((m) => console.log(m)));
-  // }
+          return throwError(
+            () =>  new Error (`No se pudo encontrar un país con ese codigo: ${code}`)
+          )
+        })
+      );
+  }
+
 }
